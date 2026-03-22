@@ -1,0 +1,38 @@
+{
+  "name": "@gonzih/homework-scaffold",
+  "version": "0.1.0",
+  "description": "MCP server that transforms homework cheating attempts into genuine learning through Socratic scaffolding",
+  "license": "MIT",
+  "author": "Gonzih",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "homework-scaffold": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "postbuild": "echo '#!/usr/bin/env node' | cat - dist/index.js > dist/index.js.tmp && mv dist/index.js.tmp dist/index.js && chmod +x dist/index.js",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "llms.txt",
+    "SKILL.md"
+  ],
+  "keywords": ["mcp", "homework", "education", "tutoring", "socratic", "scaffolding", "ai-safety"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gonzih/homework-scaffold"
+  }
+}
