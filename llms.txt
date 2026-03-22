@@ -1,0 +1,102 @@
+# homework-scaffold
+
+> MCP server that transforms homework requests into learning opportunities through Socratic scaffolding
+
+homework-scaffold is an MCP (Model Context Protocol) server that intercepts AI homework help requests and transforms them from "do this for me" into genuine learning. It uses rule-based detection (no AI calls) to classify student requests and returns appropriate Socratic scaffolding responses that guide students to figure things out themselves.
+
+All logic is deterministic — no calls to any external AI API. The MCP server exposes tools that Claude (or other AI) calls on each student message.
+
+## Tools
+
+### check_request
+
+The primary tool. Call this on every student message. Detects if the request is a homework cheating attempt and returns an appropriate scaffolded response.
+
+Parameters:
+- content (string, required): The student's message or request
+- subject (string, optional): Subject override — math, english, science, history, foreign_language, other
+- age (number, optional): Student age override
+- sessionId (string, optional): Session ID for progress tracking
+
+Returns: JSON with type, scaffoldingStrategy, response, encouragement, detectedSubject, confidence, signals
+
+### get_hint
+
+Get a step-by-step hint for a problem. Use this to walk students through multi-step problems one step at a time.
+
+Parameters:
+- problem (string, required): The problem the student is working on
+- stepNumber (number, required): Which step to give a hint for (starting at 1)
+- subject (string, required): Subject area
+- sessionId (string, optional): Session ID
+
+Returns: JSON with hint, encouragement, nextPrompt
+
+### check_work
+
+Review student work and provide feedback. This is legitimate help — students who write their own work and ask for feedback deserve full honest feedback.
+
+Parameters:
+- childWork (string, required): The student's own work
+- originalPrompt (string, required): The original assignment or prompt
+- sessionId (string, optional): Session ID
+
+Returns: JSON with feedback, corrections, encouragement
+
+### explain_concept
+
+Explain a concept clearly at the appropriate grade level. Fully legitimate — understanding concepts is what we want to encourage.
+
+Parameters:
+- concept (string, required): The concept to explain
+- gradeLevel (number, required): Grade level to pitch the explanation at (1-12)
+- sessionId (string, optional): Session ID
+
+Returns: JSON with explanation, example, tryThisQuestion
+
+### session_summary
+
+Get a summary of progress for a session.
+
+Parameters:
+- sessionId (string, required): The session ID
+
+Returns: JSON with requestsScaffolded, conceptsExplained, stepsCompleted, totalSteps, encouragements, startTime
+
+## Request Types Detected
+
+- write_for_me: Student asking AI to write their essay/report/paper
+- answer_directly: Student asking for a direct answer with no context
+- solve_completely: Student pasting problem sets asking for full solutions
+- summarize_instead: Student asking for summaries to avoid reading
+- genuine_confusion: Student expressing genuine confusion (treated as legitimate)
+- legitimate_help: Student sharing their own work for review (full help given)
+- not_homework: Not a homework request (normal response)
+
+## Configuration
+
+Set via environment variables:
+
+HOMEWORK_SCAFFOLD_CHILD_AGE=12
+HOMEWORK_SCAFFOLD_GRADE_LEVEL=7
+HOMEWORK_SCAFFOLD_STRICTNESS=balanced
+
+Strictness options: strict, balanced, relaxed
+
+## Usage with Claude Desktop
+
+Add to claude_desktop_config.json:
+
+{
+  "mcpServers": {
+    "homework-scaffold": {
+      "command": "npx",
+      "args": ["@gonzih/homework-scaffold"],
+      "env": {
+        "HOMEWORK_SCAFFOLD_CHILD_AGE": "12",
+        "HOMEWORK_SCAFFOLD_GRADE_LEVEL": "7",
+        "HOMEWORK_SCAFFOLD_STRICTNESS": "balanced"
+      }
+    }
+  }
+}
